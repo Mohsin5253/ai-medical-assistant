@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row mt-4">
+    <!-- LEFT PANEL: Dynamic Symptom Matrix Checklist -->
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white fw-bold">
+                1. Select Symptoms
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Search and select the symptoms you are currently experiencing.</p>
+                
+                <input type="text" id="symptomSearch" class="form-control mb-3" placeholder="Search symptoms (e.g. fever)..." onkeyup="filterSymptoms()">
+                
+                <form id="predictionForm">
+                    <div class="border rounded p-3 mb-3" style="max-height: 400px; overflow-y: auto;" id="symptomContainer">
+                        {% for symptom in symptoms %}
+                        <div class="form-check symptom-item">
+                            <input class="form-check-input symptom-checkbox" type="checkbox" value="{{ symptom.original }}" id="chk_{{ loop.index }}">
+                            <label class="form-check-label" for="chk_{{ loop.index }}">
+                                {{ symptom.display }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success w-100 fw-bold" id="predictBtn">
+                        Analyze Symptoms
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Analytical Reports Presentation -->
+    <div class="col-md-7 mb-4">
+        <div class="card shadow-sm h-100" id="resultCard" style="display: none;">
+            <div class="card-header bg-success text-white fw-bold">
+                2. AI Diagnosis Report
+            </div>
+            <div class="card-body">
+                
+                <h4 class="text-muted mb-1">Predicted Condition:</h4>
+                <h2 class="text-primary fw-bold mb-2" id="diseaseResult">--</h2>
+                
+                <h6 class="fw-bold">AI Confidence Score: <span id="confidenceText" class="text-success">0%</span></h6>
+                <div class="progress mb-4" style="height: 25px;">
+                    <div id="confidenceBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+                </div>
+
+                <hr>
+                <h5 class="fw-bold mt-4"><span class="badge bg-info text-dark">AI Doctor's Notes (Groq)</span></h5>
+                <div class="p-3 bg-light border rounded mb-4">
+                    <p id="llmText" style="white-space: pre-line;"></p>
+                </div>
+
+                <h5 class="fw-bold"><span class="badge bg-dark">Symptom Impact (SHAP)</span></h5>
+                <ul class="list-group list-group-flush mb-4" id="shapList"></ul>
+
+                <div class="d-grid gap-2">
+                    <a id="downloadPdfBtn" href="#" class="btn btn-outline-danger fw-bold">📄 Download PDF Report</a>
+                    <button id="hospitalBtn" class="btn btn-outline-primary fw-bold" onclick="findHospitals()">
+                        🏥 Find Nearby Hospitals
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="card shadow-sm h-100 bg-light border-0 d-flex align-items-center justify-content-center" id="placeholderCard">
+            <div class="text-center text-muted">
+                <h1 class="display-1">📊</h1>
+                <h5>Awaiting Data</h5>
+                <p>Select your symptoms on the left to see the AI diagnosis.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Linked Static External Script Module -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

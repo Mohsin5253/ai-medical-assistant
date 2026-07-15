@@ -1,0 +1,6 @@
+venv/
+instance/
+__pycache__/
+*.db
+.env
+Final_Augmented_dataset_Diseases_and_Symptoms.csv

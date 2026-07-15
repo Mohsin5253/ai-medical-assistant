@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h2 class="fw-bold mb-4">Your Prediction History 📋</h2>
+        
+        {% if records %}
+            <div class="table-responsive">
+                <table class="table table-hover shadow-sm bg-white rounded">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Date</th>
+                            <th>Symptoms</th>
+                            <th>Predicted Disease</th>
+                            <th>Confidence</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.date_predicted.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td style="max-width: 250px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                                <small>{{ record.symptoms }}</small>
+                            </td>
+                            <td class="fw-bold text-primary">{{ record.disease }}</td>
+                            <td>{{ record.confidence }}%</td>
+                            <td>
+                                <a href="{{ url_for('download_pdf', history_id=record.id) }}" class="btn btn-sm btn-outline-danger">PDF</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center py-5">
+                <h4>No history found!</h4>
+                <p>Go to your dashboard and analyze some symptoms to see your history here.</p>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
