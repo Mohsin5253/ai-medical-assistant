@@ -20,7 +20,7 @@ from reportlab.lib.enums import TA_RIGHT
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "fallback-dev-key-123")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///disease_predictor.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:////tmp/disease_predictor.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -32,8 +32,9 @@ login_manager.login_message_category = 'info'
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
-MODEL_PATH = 'ml_models/rf_model.pkl'
-SYMPTOMS_PATH = 'ml_models/symptoms_list.pkl'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, 'ml_models/rf_model.pkl')
+SYMPTOMS_PATH = os.path.join(BASE_DIR, 'ml_models/symptoms_list.pkl')
 
 model = None
 symptoms_list = None
