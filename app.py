@@ -12,10 +12,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from groq import Groq
 
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_RIGHT
+from fpdf import FPDF
 
 app = Flask(__name__)
 
@@ -250,36 +247,33 @@ def download_pdf(history_id):
     if record.user_id != current_user.id:
         return redirect(url_for('dashboard'))
 
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    styles = getSampleStyleSheet()
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt="AI Medical Prediction Report", ln=1, align='C')
     
-    story = []
-
-    story.append(Paragraph("<b>AI Medical Prediction Report</b>", styles['Title']))
-    story.append(Spacer(1, 12))
-    story.append(Paragraph(f"<b>Patient:</b> {current_user.username}", styles['Normal']))
-    
-    # Date Generated formatted to "29 June 2026, 04:30 PM"
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Patient: {current_user.username}", ln=1)
     real_time_now = datetime.now().strftime('%d %B %Y, %I:%M %p')
-    story.append(Paragraph(f"<b>Date Generated:</b> {real_time_now}", styles['Normal']))
+    pdf.cell(200, 10, txt=f"Date Generated: {real_time_now}", ln=1)
+    pdf.ln(5)
     
-    story.append(Spacer(1, 12))
+    pdf.multi_cell(0, 10, txt=f"Reported Symptoms: {record.symptoms}")
+    pdf.ln(5)
     
-    story.append(Paragraph(f"<b>Reported Symptoms:</b> {record.symptoms}", styles['Normal']))
-    story.append(Spacer(1, 12))
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(200, 10, txt=f"Predicted Condition: {record.disease} (Confidence: {record.confidence}%)", ln=1)
+    pdf.ln(5)
     
-    story.append(Paragraph(f"<b>Predicted Condition:</b> {record.disease} (Confidence: {record.confidence}%)", styles['Heading2']))
-    story.append(Spacer(1, 12))
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(200, 10, txt="AI Doctor's Notes:", ln=1)
     
-    story.append(Paragraph("<b>AI Doctor's Notes:</b>", styles['Heading3']))
-    
-    # Fix the spacing: Remove markdown asterisks AND convert newlines to <br/> tags for the PDF
-    clean_llm = record.llm_advice.replace('*', '').replace('\n', '<br/>') 
-    story.append(Paragraph(clean_llm, styles['Normal']))
+    pdf.set_font("Arial", size=11)
+    clean_llm = record.llm_advice.replace('*', '') 
+    pdf.multi_cell(0, 7, txt=clean_llm)
 
-    doc.build(story)
-    buffer.seek(0)
+    pdf_output = pdf.output(dest='S')
+    buffer = io.BytesIO(pdf_output.encode('latin1', 'replace'))
     
     return send_file(
         buffer, 
