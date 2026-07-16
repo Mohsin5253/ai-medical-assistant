@@ -23,6 +23,8 @@ if db_url.startswith("postgres://"):
 elif db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+if "postgresql" in db_url:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': {'ssl_context': True}}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -289,6 +291,11 @@ def download_pdf(history_id):
         download_name=f"Medical_Report_{record.disease}.pdf", 
         mimetype='application/pdf'
     )
+
+@app.errorhandler(500)
+def internal_error(error):
+    import traceback
+    return f"<pre>Internal Server Error: {error}\n\nTraceback:\n{traceback.format_exc()}</pre>", 500
 
 if __name__ == '__main__':
     with app.app_context():
