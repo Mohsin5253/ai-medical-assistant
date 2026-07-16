@@ -3,6 +3,7 @@ import joblib
 import numpy as np
 from datetime import datetime
 import io
+import warnings
 from dotenv import load_dotenv
 load_dotenv() 
 
@@ -166,8 +167,10 @@ def predict_api():
                 display_symptoms.append(symptom.replace('_', ' ').title())
                 
         features_array = input_data.reshape(1, -1)
-        prediction = model.predict(features_array)[0]
-        confidence_score = round(max(model.predict_proba(features_array)[0]) * 100, 2)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            prediction = model.predict(features_array)[0]
+            confidence_score = round(max(model.predict_proba(features_array)[0]) * 100, 2)
         
         contributing_symptoms = []
         try:
