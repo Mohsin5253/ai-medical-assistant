@@ -2,10 +2,10 @@ import os
 import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
 
-print("🚀 Starting >95% Accuracy Model Training...")
+print("🚀 Starting Logistic Regression Model Training...")
 
 os.makedirs('ml_models', exist_ok=True)
 
@@ -17,20 +17,18 @@ y = df["diseases"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-from sklearn.tree import DecisionTreeClassifier
+print("Training the memory-efficient model (Please wait 1-2 minutes)...")
 
-print("Training the MAXIMUM accuracy model (Please wait 1-3 minutes)...")
-
-model = DecisionTreeClassifier(random_state=42)
+model = LogisticRegression(max_iter=500)
 model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f"\n🎯 FINAL MODEL ACCURACY: {accuracy * 100:.2f}%")
 
-print("Applying MAXIMUM compression to save the file safely...")
+print("Saving the file safely...")
 
 joblib.dump(model, 'ml_models/rf_model.pkl', compress=9)
 joblib.dump(list(X.columns), 'ml_models/symptoms_list.pkl') 
 
-print("\n✅ >95% Accuracy Model saved securely in 'ml_models/'!")
+print("\n✅ Model saved securely in 'ml_models/'!")

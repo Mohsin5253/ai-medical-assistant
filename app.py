@@ -11,7 +11,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from groq import Groq
-
 from fpdf import FPDF
 
 app = Flask(__name__)
@@ -172,7 +171,13 @@ def predict_api():
         
         contributing_symptoms = []
         try:
-            importances = model.feature_importances_
+            if hasattr(model, 'feature_importances_'):
+                importances = model.feature_importances_
+            else:
+                # Fallback for linear models like LogisticRegression
+                class_index = list(model.classes_).index(prediction)
+                importances = model.coef_[class_index]
+            
             for i, symptom in enumerate(symptoms_list):
                 if input_data[i] == 1 and importances[i] > 0:
                     impact_score = round(float(importances[i]) * 1000, 2)
